@@ -1,0 +1,32 @@
+name: qatar_teachers
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  dio: ^5.11.1
+  equatable: ^3.0.0
+  dartz: ^0.10.1
+  flutter_riverpod: ^3.4.3
+  flutter_screenutil: ^5.9.3
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.5.6
+  url_launcher: ^6.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
