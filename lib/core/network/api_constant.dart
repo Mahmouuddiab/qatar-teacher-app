@@ -16,21 +16,50 @@ class ApiConstants {
 
   // ==================== Teacher Profile Endpoints ====================
 
-  static const String updateTeacherProfile = '/api/Teacher/profile';
+  /// GET: get teacher profile | PUT: update teacher profile
+  static const String teacherProfile = '/api/Teacher/profile';
 
-  static String teacherProfile(String id) => '/api/Teacher/profile/$id';
+  // ==================== Teacher Home Endpoints ====================
 
-  static const String createTeacherAvailability = '/api/Teacher/availability';
+  /// GET: dashboard statistics
+  static const String teacherDashboard = '/api/Teacher/dashboard';
 
-  static const String teacherAvailability = '/api/Teacher/availability';
+  /// GET: booking statistics
+  static const String teacherBookingCounts = '/api/Teacher/bookings/counts';
 
-  static const String deleteTeacherAvailability = '/api/Teacher/availability';
+  /// GET: preview of upcoming sessions
+  static const String teacherUpcomingBookings = '/api/Teacher/bookings/upcoming';
 
+  // ==================== Teacher Course Endpoints ====================
+
+  /// GET: all teacher courses | POST: create a course
+  static const String teacherCourses = '/api/Teacher/courses';
+
+  /// GET: course details | PUT: update course | DELETE: delete course
+  static String teacherCourseById(int id) => '/api/Teacher/courses/$id';
+
+  // ==================== Teacher Bookings Endpoints ====================
+
+  /// GET: all bookings
   static const String teacherBookings = '/api/Teacher/bookings';
 
-  static const String updateTeacherBookingStatus = '/api/Teacher/bookings';
+  /// GET: booking details
+  static String teacherBookingById(int id) => '/api/Teacher/bookings/$id';
 
-  static const String completeTeacherBooking = '/api/Teacher/bookings';
+  /// PUT: accept / reject / update booking status
+  static String teacherBookingStatus(int id) =>
+      '/api/Teacher/bookings/$id/status';
 
-  static const String teacherDashboard = '/api/Teacher/dashboard';
+  /// PUT: mark booking as completed
+  static String teacherBookingComplete(int id) =>
+      '/api/Teacher/bookings/$id/complete';
+
+  // ==================== Teacher Schedule Endpoints ====================
+
+  /// GET: teacher availability | POST: add availability
+  static const String teacherAvailability = '/api/Teacher/availability';
+
+  /// DELETE: delete availability
+  static String teacherAvailabilityById(int id) =>
+      '/api/Teacher/availability/$id';
 }

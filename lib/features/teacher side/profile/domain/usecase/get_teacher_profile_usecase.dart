@@ -4,5 +4,5 @@ import '../entity/profile_entity.dart';
 class GetTeacherProfileUseCase {
   final TeacherProfileRepository repo;
   GetTeacherProfileUseCase(this.repo);
-  Future<ProfileEntity> call(String id)=> repo.getTeacherProfile(id);
+  Future<ProfileEntity> call()=> repo.getTeacherProfile();
 }
