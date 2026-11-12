@@ -25,10 +25,10 @@ class ApiConstants {
   static const String teacherDashboard = '/api/Teacher/dashboard';
 
   /// GET: booking statistics
-  static const String teacherBookingCounts = '/api/Teacher/bookings/counts';
+  static const String teacherBookingCounts = '/api/Teacher/booking/counts';
 
   /// GET: preview of upcoming sessions
-  static const String teacherUpcomingBookings = '/api/Teacher/bookings/upcoming';
+  static const String teacherUpcomingBookings = '/api/Teacher/booking/upcoming';
 
   // ==================== Teacher Course Endpoints ====================
 
@@ -40,19 +40,19 @@ class ApiConstants {
 
   // ==================== Teacher Bookings Endpoints ====================
 
-  /// GET: all bookings
-  static const String teacherBookings = '/api/Teacher/bookings';
+  /// GET: all booking
+  static const String teacherBookings = '/api/Teacher/booking';
 
   /// GET: booking details
-  static String teacherBookingById(int id) => '/api/Teacher/bookings/$id';
+  static String teacherBookingById(int id) => '/api/Teacher/booking/$id';
 
   /// PUT: accept / reject / update booking status
   static String teacherBookingStatus(int id) =>
-      '/api/Teacher/bookings/$id/status';
+      '/api/Teacher/booking/$id/status';
 
   /// PUT: mark booking as completed
   static String teacherBookingComplete(int id) =>
-      '/api/Teacher/bookings/$id/complete';
+      '/api/Teacher/booking/$id/complete';
 
   // ==================== Teacher Schedule Endpoints ====================
 
