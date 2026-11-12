@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
-import 'package:qatar_teachers/features/teacher%20side/availability/presentation/screens/teacher_availability_screen.dart';
 import 'package:qatar_teachers/features/teacher%20side/home/presentation/screens/teacher_home_screen.dart';
 import 'package:qatar_teachers/features/teacher%20side/profile/presentation/screens/teacher_profile_screen.dart';
-
+import '../../features/teacher side/availability/presentation/screens/teacher_availability_screen.dart';
 import '../../features/teacher side/bookings/presentation/screens/teacher_bookings_screen.dart';
 
 class TeacherNavigationScreen extends StatefulWidget {
