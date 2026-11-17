@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
+import 'package:qatar_teachers/features/auth/presentation/providers/auth_providers.dart';
 import 'package:qatar_teachers/features/teacher%20side/profile/domain/entity/profile_entity.dart';
 import '../providers/teacher_profile_providers.dart';
 import '../widgets/profile_actions_section.dart';
@@ -48,15 +50,59 @@ class TeacherProfileScreen extends ConsumerWidget {
   }
 }
 
-class _ProfileContent extends StatelessWidget {
+class _ProfileContent extends ConsumerWidget {
   const _ProfileContent({required this.profile});
 
   final ProfileEntity profile;
 
   static const double _bottomSpace = 120;
 
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Log out?'),
+        content: const Text('You will need to sign in again.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Log out',
+              style: TextStyle(color: AppColors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      ref.read(logoutProvider.notifier).logout();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<LogoutStatus>(logoutProvider, (prev, next) {
+      if (next == LogoutStatus.success) {
+        // No invalidate here: these screens are still mounted, so it would
+        // refetch without a token and return 401.
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+              (route) => false,
+        );
+      }
+    });
+
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
@@ -89,8 +135,10 @@ class _ProfileContent extends StatelessWidget {
               const SizedBox(height: 4),
               ProfileActionsSection(
                 onEditProfile: () => _openEditProfile(context, profile),
-                onSettings: () {},
-                onLogout: () {},
+                onChangePassword: () =>
+                    Navigator.pushNamed(context, AppRoutes.changePassword),
+                onSettings: () {}, // TODO: settings screen
+                onLogout: () => _confirmLogout(context, ref),
               ),
             ],
           ),

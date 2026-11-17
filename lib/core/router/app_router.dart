@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qatar_teachers/features/auth/presentation/screens/change_password_screen.dart';
 import 'package:qatar_teachers/features/auth/presentation/screens/login_screen.dart';
 import 'package:qatar_teachers/features/auth/presentation/screens/register_screen.dart';
 import '../../features/on boarding/screen/onboarding_screen.dart';
@@ -18,18 +19,24 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => RegisterScreen());
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => LoginScreen());
+      case AppRoutes.changePassword:
+        return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
+
       case AppRoutes.addCourse:
         return MaterialPageRoute(builder: (_) => const AddCourseScreen());
       case AppRoutes.allCourses:
         return MaterialPageRoute(builder: (_) => const AllCoursesScreen());
-      case AppRoutes.editCourse:
-        final course = settings.arguments as CourseEntity;
-        return MaterialPageRoute(builder: (_) => EditCourseScreen(course: course));
       case AppRoutes.courseDetails:
         final courseId = settings.arguments as int;
         return MaterialPageRoute(
           builder: (_) => CourseDetailsScreen(courseId: courseId),
         );
+      case AppRoutes.editCourse:
+        final course = settings.arguments as CourseEntity;
+        return MaterialPageRoute(
+          builder: (_) => EditCourseScreen(course: course),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) =>

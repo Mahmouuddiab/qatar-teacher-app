@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 
-/// Account actions: Edit Profile and Settings in one card, Logout in its own.
 class ProfileActionsSection extends StatelessWidget {
   const ProfileActionsSection({
     super.key,
     required this.onEditProfile,
+    required this.onChangePassword,
     required this.onSettings,
     required this.onLogout,
   });
 
   final VoidCallback onEditProfile;
+  final VoidCallback onChangePassword;
   final VoidCallback onSettings;
   final VoidCallback onLogout;
 
@@ -24,6 +25,12 @@ class ProfileActionsSection extends StatelessWidget {
               icon: Icons.edit_outlined,
               title: 'Edit Profile',
               onTap: onEditProfile,
+            ),
+            const _MenuDivider(),
+            _ProfileMenuTile(
+              icon: Icons.lock_outline_rounded,
+              title: 'Change Password',
+              onTap: onChangePassword,
             ),
             const _MenuDivider(),
             _ProfileMenuTile(
@@ -56,7 +63,6 @@ class _ActionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Material (not Container) so the tap ripple is visible on the tiles.
     return Material(
       color: AppColors.surface,
       clipBehavior: Clip.antiAlias,
