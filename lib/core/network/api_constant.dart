@@ -35,8 +35,14 @@ class ApiConstants {
   /// GET: all teacher courses | POST: create a course
   static const String teacherCourses = '/api/Teacher/courses';
 
-  /// GET: course details | PUT: update course | DELETE: delete course
-  static String teacherCourseById(int id) => '/api/Teacher/courses/$id';
+  ///  PUT: update course
+  static String updateTeacherCourse(int id) => '/api/Teacher/courses/$id';
+
+  ///  PUT: delete course
+  static String deleteTeacherCourse(int id) => '/api/Teacher/courses/$id';
+
+  /// GET: course details
+  static String teacherCourseDetails(int id) => '/api/Teacher/courses/$id';
 
   // ==================== Teacher Bookings Endpoints ====================
 
