@@ -1,6 +1,7 @@
 import 'package:qatar_teachers/core/params/add_course_params.dart';
 import 'package:qatar_teachers/core/params/update_course_params.dart';
 import 'package:qatar_teachers/features/teacher%20side/home/domain/entities/course_entity.dart';
+import 'package:qatar_teachers/features/teacher%20side/home/domain/entities/dashboard_entity.dart';
 import 'package:qatar_teachers/features/teacher%20side/home/domain/repository/teacher_home_repository.dart';
 import '../data source/teacher_home_remote_ds.dart';
 
@@ -23,12 +24,17 @@ class TeacherHomeRepositoryImpl implements TeacherHomeRepository {
   }
 
   @override
-  Future<CourseEntity> updateCourse(UpdateCourseParams params) async{
+  Future<CourseEntity> updateCourse(UpdateCourseParams params) async {
     return await _remote.updateCourse(params);
   }
 
   @override
-  Future<void> deleteCourse(int id) async{
+  Future<void> deleteCourse(int id) async {
     return await _remote.deleteCourse(id);
+  }
+
+  @override
+  Future<DashboardEntity> getDashboard() async {
+    return await _remote.getDashboard();
   }
 }

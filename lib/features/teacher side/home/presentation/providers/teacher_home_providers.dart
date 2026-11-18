@@ -5,11 +5,13 @@ import 'package:qatar_teachers/core/params/update_course_params.dart';
 import '../../data/data source/teacher_home_remote_ds.dart';
 import '../../data/repository/teacher_home_repository_impl.dart';
 import '../../domain/entities/course_entity.dart';
+import '../../domain/entities/dashboard_entity.dart';
 import '../../domain/repository/teacher_home_repository.dart';
 import '../../domain/usecases/add_course_usecase.dart';
 import '../../domain/usecases/delete_course_usecase.dart';
 import '../../domain/usecases/get_course_details_usecase.dart';
 import '../../domain/usecases/get_courses_usecase.dart';
+import '../../domain/usecases/get_dashboard_usecase.dart';
 import '../../domain/usecases/update_course_usecase.dart';
 
 /// ───────────── Dependencies ─────────────
@@ -47,6 +49,14 @@ final updateCourseUseCaseProvider = Provider<UpdateCourseUseCase>(
 
 final deleteCourseUseCaseProvider = Provider<DeleteCourseUseCase>(
   (ref) => DeleteCourseUseCase(ref.watch(teacherHomeRepositoryProvider)),
+);
+
+final getDashboardUseCaseProvider = Provider<GetDashboardUseCase>(
+      (ref) => GetDashboardUseCase(ref.watch(teacherHomeRepositoryProvider)),
+);
+
+final dashboardProvider = FutureProvider.autoDispose<DashboardEntity>(
+      (ref) => ref.read(getDashboardUseCaseProvider)(),
 );
 
 /// ───────────── Get courses ─────────────

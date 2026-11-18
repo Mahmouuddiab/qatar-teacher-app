@@ -5,6 +5,7 @@ import 'package:qatar_teachers/core/error/failure.dart';
 import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 import '../../domain/entities/course_entity.dart';
+import '../../domain/entities/dashboard_entity.dart';
 import '../providers/teacher_home_providers.dart';
 import '../widgets/course_card.dart';
 import '../widgets/home_constant.dart';
@@ -16,16 +17,125 @@ class TeacherHomeScreen extends ConsumerWidget {
   const TeacherHomeScreen({super.key});
 
   static const int _previewCount = 3;
+  static const _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
 
   void _goToAddCourse(BuildContext context) {
     Navigator.pushNamed(context, AppRoutes.addCourse);
   }
 
+  // ---------- formatting helpers ----------
+
+  String _formatDate(DateTime? d) {
+    if (d == null) return '-';
+    final l = d.toLocal();
+    return '${l.day} ${_months[l.month - 1]}';
+  }
+
+  /// "17:00" -> "05:00 PM". Returns the input unchanged if it can't be parsed.
+  String _formatTime(String t) {
+    final parts = t.split(':');
+    if (parts.length < 2) return t;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return t;
+    final period = h >= 12 ? 'PM' : 'AM';
+    final h12 = h % 12 == 0 ? 12 : h % 12;
+    return '${h12.toString().padLeft(2, '0')}:'
+        '${m.toString().padLeft(2, '0')} $period';
+  }
+
+  String _formatNumber(num v, {int decimals = 2}) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(decimals);
+
+  // ---------- sections ----------
+
+  Widget _buildGreeting(String name) {
+    if (name.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        "Hello, $name",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildSessions(
+      WidgetRef ref,
+      AsyncValue<DashboardEntity> dashboardAsync,
+      ) {
+    return dashboardAsync.when(
+      loading: () => const [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+      ],
+      error: (e, _) => [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            children: [
+              Text(
+                e is Failure ? e.message : 'Failed to load sessions',
+                textAlign: TextAlign.center,
+              ),
+              TextButton(
+                onPressed: () => ref.invalidate(dashboardProvider),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      ],
+      data: (dashboard) {
+        final sessions = dashboard.upcomingSessions;
+        if (sessions.isEmpty) {
+          return const [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  'No upcoming sessions',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            ),
+          ];
+        }
+        return [
+          for (int i = 0; i < sessions.length; i++) ...[
+            if (i > 0) const SizedBox(height: 12),
+            UpcomingSessionTile(
+              courseTitle: sessions[i].courseTitle,
+              studentName: sessions[i].studentName,
+              date: _formatDate(sessions[i].date),
+              time:
+              '${_formatTime(sessions[i].startTime)} - ${_formatTime(sessions[i].endTime)}',
+              mode: sessions[i].mode,
+            ),
+          ],
+        ];
+      },
+    );
+  }
+
   List<Widget> _buildCourses(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<List<CourseEntity>> coursesAsync,
-  ) {
+      BuildContext context,
+      WidgetRef ref,
+      AsyncValue<List<CourseEntity>> coursesAsync,
+      ) {
     return coursesAsync.when(
       loading: () => const [
         Padding(
@@ -86,6 +196,12 @@ class TeacherHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final coursesAsync = ref.watch(coursesProvider);
+    final dashboardAsync = ref.watch(dashboardProvider);
+
+    // Stat values show "-" while loading or on error
+    final dashboard = dashboardAsync.value;
+    String stat(String Function(DashboardEntity d) pick) =>
+        dashboard == null ? '-' : pick(dashboard);
 
     final activeCourses = coursesAsync.maybeWhen(
       data: (courses) => courses.where((c) => c.isActive).length.toString(),
@@ -98,27 +214,62 @@ class TeacherHomeScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: RefreshIndicator(
-            onRefresh: () => ref.read(coursesProvider.notifier).refresh(),
+            color: AppColors.primary,
+            onRefresh: () async {
+              ref.invalidate(dashboardProvider);
+              await Future.wait([
+                ref
+                    .read(dashboardProvider.future)
+                    .then((_) {}, onError: (_) {}),
+                ref.read(coursesProvider.notifier).refresh(),
+              ]);
+            },
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               children: [
+                // ---- Teacher name, then Dashboard ----
+                _buildGreeting(dashboard?.teacherName ?? ''),
                 const SectionHeader(title: 'Dashboard'),
                 const SizedBox(height: 12),
-                const Row(
+                Row(
                   children: [
                     Expanded(
                       child: StatCard(
-                        icon: Icons.event_available_outlined,
-                        value: '24',
-                        label: 'Total bookings',
+                        icon: Icons.payments_outlined,
+                        value: stat(
+                              (d) => '${_formatNumber(d.totalEarningsQAR)} QAR',
+                        ),
+                        label: 'Total earnings',
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: StatCard(
+                        icon: Icons.star_outline_rounded,
+                        value: stat(
+                              (d) => _formatNumber(d.averageRating, decimals: 1),
+                        ),
+                        label: 'Average rating',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StatCard(
+                        icon: Icons.hourglass_empty_rounded,
+                        value: stat((d) => d.pendingRequests.toString()),
+                        label: 'Pending requests',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: StatCard(
                         icon: Icons.upcoming_outlined,
-                        value: '5',
+                        value: stat((d) => d.upcomingClasses.toString()),
                         label: 'Upcoming',
                       ),
                     ),
@@ -135,10 +286,10 @@ class TeacherHomeScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: StatCard(
                         icon: Icons.check_circle_outline,
-                        value: '16',
+                        value: stat((d) => d.completedClasses.toString()),
                         label: 'Completed',
                       ),
                     ),
@@ -164,28 +315,14 @@ class TeacherHomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // ---- Upcoming sessions preview ----
+                // ---- Upcoming sessions (from dashboard) ----
                 SectionHeader(
                   title: 'Upcoming Sessions',
                   actionText: 'See all',
                   onAction: () {}, // TODO: go to bookings tab
                 ),
                 const SizedBox(height: 12),
-                const UpcomingSessionTile(
-                  courseTitle: 'Mathematics for Beginners',
-                  studentName: 'Ahmed Ali',
-                  date: '17 Nov',
-                  time: '04:00 PM - 05:00 PM',
-                  mode: 'Online',
-                ),
-                const SizedBox(height: 12),
-                const UpcomingSessionTile(
-                  courseTitle: 'Algebra Essentials',
-                  studentName: 'Sara Hassan',
-                  date: '18 Nov',
-                  time: '06:00 PM - 07:00 PM',
-                  mode: 'In person',
-                ),
+                ..._buildSessions(ref, dashboardAsync),
                 const SizedBox(height: 24),
 
                 // ---- My courses (from API) ----

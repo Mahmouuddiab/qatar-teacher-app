@@ -47,14 +47,14 @@ class ApiConstants {
   // ==================== Teacher Bookings Endpoints ====================
 
   /// GET: all booking
-  static const String teacherBookings = '/api/Teacher/booking';
+  static const String teacherBookings = '/api/Teacher/bookings';
 
   /// GET: booking details
-  static String teacherBookingById(int id) => '/api/Teacher/booking/$id';
+  static String teacherBookingById(int id) => '/api/Teacher/bookings/$id';
 
   /// PUT: accept / reject / update booking status
   static String teacherBookingStatus(int id) =>
-      '/api/Teacher/booking/$id/status';
+      '/api/Teacher/bookings/$id/status';
 
   /// PUT: mark booking as completed
   static String teacherBookingComplete(int id) =>

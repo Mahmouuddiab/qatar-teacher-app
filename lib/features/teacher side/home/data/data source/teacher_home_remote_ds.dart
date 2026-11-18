@@ -6,6 +6,7 @@ import 'package:qatar_teachers/core/network/dio_helper.dart';
 import 'package:qatar_teachers/core/params/add_course_params.dart';
 import 'package:qatar_teachers/core/params/update_course_params.dart';
 import '../models/course_model.dart';
+import '../models/dashboard_model.dart';
 
 abstract class TeacherHomeRemoteDataSource {
   Future<CourseModel> addCourse(AddCourseParams params);
@@ -13,6 +14,7 @@ abstract class TeacherHomeRemoteDataSource {
   Future<CourseModel> getCourseDetails(int id);
   Future<CourseModel> updateCourse(UpdateCourseParams params);
   Future<void> deleteCourse(int id);
+  Future<DashboardModel> getDashboard();
 }
 
 class TeacherHomeRemoteDataSourceImpl implements TeacherHomeRemoteDataSource {
@@ -145,6 +147,33 @@ class TeacherHomeRemoteDataSourceImpl implements TeacherHomeRemoteDataSource {
       throw ServerException();
     } catch (e) {
       debugPrint('deleteCourse error: $e');
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<DashboardModel> getDashboard() async {
+    try {
+      final response = await DioHelper.get(
+        path: ApiConstants.teacherDashboard,
+        withAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final json = data is Map<String, dynamic> &&
+            data['data'] is Map<String, dynamic>
+            ? data['data'] as Map<String, dynamic>
+            : data as Map<String, dynamic>;
+        return DashboardModel.fromJson(json);
+      }
+      throw ServerException();
+    } on ServerException {
+      rethrow;
+    } on DioException {
+      throw ServerException();
+    } catch (e) {
+      debugPrint('getDashboard error: $e');
       throw ServerException();
     }
   }
