@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
-
 import '../models/booking_ui_model.dart';
 
 class BookingActions extends StatelessWidget {

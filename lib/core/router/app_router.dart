@@ -3,6 +3,7 @@ import 'package:qatar_teachers/features/auth/presentation/screens/change_passwor
 import 'package:qatar_teachers/features/auth/presentation/screens/login_screen.dart';
 import 'package:qatar_teachers/features/auth/presentation/screens/register_screen.dart';
 import '../../features/on boarding/screen/onboarding_screen.dart';
+import '../../features/teacher side/booking/presentation/screens/teacher_booking_details_screen.dart';
 import '../../features/teacher side/home/domain/entities/course_entity.dart';
 import '../../features/teacher side/home/presentation/screens/add_course_screen.dart';
 import '../../features/teacher side/home/presentation/screens/all_courses_screen.dart';
@@ -37,10 +38,16 @@ class AppRouter {
           builder: (_) => EditCourseScreen(course: course),
         );
 
+      case AppRoutes.teacherBookingDetails:
+        final bookingId = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => TeacherBookingDetailsScreen(bookingId: bookingId),
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) =>
-          const Scaffold(body: Center(child: Text("Not Found"))),
+              const Scaffold(body: Center(child: Text("Not Found"))),
         );
     }
   }

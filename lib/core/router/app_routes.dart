@@ -7,4 +7,5 @@ class AppRoutes {
   static const String allCourses = '/AllCoursesScreen';
   static const String editCourse = '/EditCourseScreen';
   static const String changePassword = '/ChangePasswordScreen';
+  static const String teacherBookingDetails = '/TeacherBookingDetailsScreen';
 }
