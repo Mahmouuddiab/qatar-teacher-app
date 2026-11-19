@@ -139,7 +139,7 @@ class _TeacherBookingsScreenState extends ConsumerState<TeacherBookingScreen> {
                                 booking.id,
                                 accept: false,
                               ),
-                              onComplete: () {}, // TODO: PUT complete
+                              onComplete: () => confirmAndCompleteBooking(context, ref, booking.id),
                             );
                           },
                         ),

@@ -36,8 +36,9 @@ Future<void> respondToBooking(
     if (confirmed != true) return;
   }
 
-  final error =
-  await ref.read(bookingActionProvider.notifier).respond(id, accept);
+  final error = await ref
+      .read(bookingActionProvider.notifier)
+      .respond(id, accept);
 
   if (error != null) {
     AppSnackBar.error(error);
@@ -45,5 +46,46 @@ Future<void> respondToBooking(
     AppSnackBar.success('Booking accepted');
   } else {
     AppSnackBar.warning('Booking rejected');
+  }
+}
+
+Future<void> confirmAndCompleteBooking(
+    BuildContext context,
+    WidgetRef ref,
+    int id,
+    ) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Complete session?'),
+      content: const Text('Mark this session as completed.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text(
+            'Complete',
+            style: TextStyle(color: AppColors.success),
+          ),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return;
+
+  final error = await ref.read(bookingActionProvider.notifier).complete(id);
+
+  if (error != null) {
+    AppSnackBar.error(error);
+  } else {
+    AppSnackBar.success('Session marked as completed');
   }
 }

@@ -200,7 +200,7 @@ class _Body extends ConsumerWidget {
                   respondToBooking(context, ref, booking.id, accept: true),
               onReject: () =>
                   respondToBooking(context, ref, booking.id, accept: false),
-              onComplete: () {}, // TODO: PUT complete
+              onComplete: () => confirmAndCompleteBooking(context, ref, booking.id),
             ),
           ),
         ),
