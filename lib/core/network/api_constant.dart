@@ -68,4 +68,23 @@ class ApiConstants {
   /// DELETE: delete availability
   static String teacherAvailabilityById(int id) =>
       '/api/Teacher/availability/$id';
+
+  // ==================== Teacher Notifications Endpoints ====================
+
+  /// GET: Get all teacher notifications
+  static const String teacherNotifications =
+      '/api/Teacher/notifications';
+
+  /// GET: Get unread notifications count
+  static const String teacherNotificationsUnreadCount =
+      '/api/Teacher/notifications/unread-count';
+
+  /// PUT: Mark a specific notification as read
+  static String markTeacherNotificationAsRead(int id) =>
+      '/api/Teacher/notifications/$id/read';
+
+  /// PUT: Mark all notifications as read
+  static const String markAllTeacherNotificationsAsRead =
+      '/api/Teacher/notifications/read-all';
+
 }

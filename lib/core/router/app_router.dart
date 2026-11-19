@@ -9,6 +9,7 @@ import '../../features/teacher side/home/presentation/screens/add_course_screen.
 import '../../features/teacher side/home/presentation/screens/all_courses_screen.dart';
 import '../../features/teacher side/home/presentation/screens/course_details_screen.dart';
 import '../../features/teacher side/home/presentation/screens/edit_course_screen.dart';
+import '../../features/teacher side/notifications/presentation/screens/teacher_notifications_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -22,7 +23,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case AppRoutes.changePassword:
         return MaterialPageRoute(builder: (_) => const ChangePasswordScreen());
-
+      case AppRoutes.teacherNotifications:
+        return MaterialPageRoute(
+          builder: (_) => const TeacherNotificationsScreen(),
+        );
       case AppRoutes.addCourse:
         return MaterialPageRoute(builder: (_) => const AddCourseScreen());
       case AppRoutes.allCourses:
