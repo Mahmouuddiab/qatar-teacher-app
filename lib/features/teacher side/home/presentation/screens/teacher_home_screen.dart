@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/error/failure.dart';
 import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
+import '../../../notifications/presentation/providers/teacher_notifications_providers.dart';
+import '../../../notifications/presentation/widgets/notification_bell.dart';
 import '../../domain/entities/course_entity.dart';
 import '../../domain/entities/dashboard_entity.dart';
 import '../providers/teacher_home_providers.dart';
@@ -53,18 +55,24 @@ class TeacherHomeScreen extends ConsumerWidget {
   // ---------- sections ----------
 
   Widget _buildGreeting(String name) {
-    if (name.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        "Hello, $name",
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w500,
-          color: AppColors.primary,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              name.isEmpty ? '' : 'Hello, $name',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const NotificationBell(),
+        ],
       ),
     );
   }
@@ -217,6 +225,7 @@ class TeacherHomeScreen extends ConsumerWidget {
             color: AppColors.primary,
             onRefresh: () async {
               ref.invalidate(dashboardProvider);
+              ref.invalidate(unreadCountProvider);
               await Future.wait([
                 ref
                     .read(dashboardProvider.future)
@@ -228,7 +237,7 @@ class TeacherHomeScreen extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               children: [
-                // ---- Teacher name, then Dashboard ----
+                // ---- Greeting + notifications bell ----
                 _buildGreeting(dashboard?.teacherName ?? ''),
                 const SectionHeader(title: 'Dashboard'),
                 const SizedBox(height: 12),
