@@ -25,4 +25,13 @@ class TeacherBookingRepositoryImpl implements TeacherBookingRepository {
       throw const ServerFailure('Failed to update booking');
     }
   }
+
+  @override
+  Future<void> completeBooking(int id) async {
+    try {
+      await _remote.completeBooking(id);
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
 }

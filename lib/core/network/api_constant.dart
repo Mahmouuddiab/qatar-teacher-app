@@ -58,7 +58,7 @@ class ApiConstants {
 
   /// PUT: mark booking as completed
   static String teacherBookingComplete(int id) =>
-      '/api/Teacher/booking/$id/complete';
+      '/api/Teacher/bookings/$id/complete';
 
   // ==================== Teacher Schedule Endpoints ====================
 

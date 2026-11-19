@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/params/login_params.dart';
 import 'package:qatar_teachers/core/router/app_routes.dart';
+import 'package:qatar_teachers/core/screens/student_navigation_screen.dart';
 import 'package:qatar_teachers/core/screens/teacher_navigation_screen.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 import 'package:qatar_teachers/core/validator/app_validator.dart';
@@ -62,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (role.toLowerCase() == 'teacher') {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>TeacherNavigationScreen()));
     } else {
-      // Navigator.pushReplacementNamed(context, AppRoutes.studentNavigation);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>StudentNavigationScreen()));
     }
   }
 
