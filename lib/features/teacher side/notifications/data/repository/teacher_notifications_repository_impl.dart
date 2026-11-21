@@ -43,4 +43,13 @@ class TeacherNotificationsRepositoryImpl
       throw ServerFailure(e.message);
     }
   }
+
+  @override
+  Future<void> markAllAsRead() async {
+    try {
+      await _remote.markAllAsRead();
+    } on ServerException catch (e) {
+      throw ServerFailure(e.message);
+    }
+  }
 }

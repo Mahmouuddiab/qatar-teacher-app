@@ -14,6 +14,7 @@ abstract class TeacherNotificationsDs {
   });
   Future<int> getUnreadCount();
   Future<void> markAsRead(int id);
+  Future<void> markAllAsRead();
 }
 
 class TeacherNotificationsDsImpl implements TeacherNotificationsDs {
@@ -91,6 +92,25 @@ class TeacherNotificationsDsImpl implements TeacherNotificationsDs {
       throw ServerException(messageFromDio(e));
     } catch (e) {
       debugPrint('markAsRead error: $e');
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<void> markAllAsRead() async {
+    try {
+      final response = await DioHelper.put(
+        path: ApiConstants.markAllTeacherNotificationsAsRead,
+        withAuth: true,
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) return;
+      throw ServerException(messageFromResponse(response));
+    } on ServerException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ServerException(messageFromDio(e));
+    } catch (e) {
+      debugPrint('markAllAsRead error: $e');
       throw ServerException();
     }
   }

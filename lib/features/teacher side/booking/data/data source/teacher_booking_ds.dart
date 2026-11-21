@@ -75,7 +75,7 @@ class TeacherBookingDsImpl implements TeacherBookingDs {
         withAuth: true,
       );
       if (response.statusCode == 200 || response.statusCode == 204) return;
-      throw ServerException();
+      throw ServerException(messageFromResponse(response));
     } on ServerException {
       rethrow;
     } on DioException catch (e) {

@@ -8,4 +8,5 @@ abstract class TeacherNotificationsRepository {
   });
   Future<int> getUnreadCount();
   Future<void> markAsRead(int id);
+  Future<void> markAllAsRead();
 }
