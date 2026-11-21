@@ -21,8 +21,8 @@ class TeacherBookingRepositoryImpl implements TeacherBookingRepository {
   Future<void> respondToBooking(int id, bool accept) async {
     try {
       await _remote.respondToBooking(id, accept);
-    } on ServerException {
-      throw const ServerFailure('Failed to update booking');
+    } on ServerException catch(e){
+      throw  ServerFailure(e.message);
     }
   }
 

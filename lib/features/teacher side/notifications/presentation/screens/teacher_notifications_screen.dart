@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/error/failure.dart';
 import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
+import 'package:qatar_teachers/core/widgets/app_snackbar.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../providers/teacher_notifications_providers.dart';
 import '../widgets/notification_tile.dart';
@@ -26,12 +27,14 @@ class _TeacherNotificationsScreenState
 
   Future<void> _refresh() async {
     ref.invalidate(notificationsProvider(_unreadOnly));
+    ref.invalidate(unreadCountProvider);
     await ref
         .read(notificationsProvider(_unreadOnly).future)
         .then((_) {}, onError: (_) {});
   }
 
   void _open(NotificationEntity n) {
+    // Fire and forget: navigation shouldn't wait for this request
     if (!n.isRead) {
       ref.read(notificationActionsProvider.notifier).markRead(n.id);
     }
@@ -45,9 +48,22 @@ class _TeacherNotificationsScreenState
     );
   }
 
+  Future<void> _markAllRead() async {
+    final error = await ref
+        .read(notificationActionsProvider.notifier)
+        .markAllRead();
+    if (error != null) {
+      AppSnackBar.error(error);
+    } else {
+      AppSnackBar.success('All notifications marked as read');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(notificationsProvider(_unreadOnly));
+    final busy = ref.watch(notificationActionsProvider);
+    final unread = ref.watch(unreadCountProvider).value ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -65,6 +81,28 @@ class _TeacherNotificationsScreenState
             fontWeight: FontWeight.w700,
           ),
         ),
+        actions: [
+          if (busy)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            )
+          else if (unread > 0)
+            IconButton(
+              tooltip: 'Mark all as read',
+              icon: const Icon(Icons.done_all_rounded),
+              onPressed: _markAllRead,
+            ),
+        ],
       ),
       body: Column(
         children: [

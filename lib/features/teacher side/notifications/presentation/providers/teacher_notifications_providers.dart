@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qatar_teachers/core/error/app_exception.dart';
+import 'package:qatar_teachers/core/error/failure.dart';
 import '../../data/data source/teacher_notifications_ds.dart';
 import '../../data/repository/teacher_notifications_repository_impl.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repository/teacher_notifications_repository.dart';
 import '../../domain/usecases/get_notifications_usecase.dart';
 import '../../domain/usecases/get_unread_count_usecase.dart';
+import '../../domain/usecases/mark_all_notifications_read_usecase.dart';
 import '../../domain/usecases/mark_notification_read_usecase.dart';
 
 final teacherNotificationsDsProvider = Provider<TeacherNotificationsDs>(
@@ -49,25 +52,55 @@ final markNotificationReadUseCaseProvider =
       ),
     );
 
-class NotificationActionsNotifier extends Notifier<void> {
-  @override
-  void build() {}
+final markAllNotificationsReadUseCaseProvider =
+    Provider<MarkAllNotificationsReadUseCase>(
+      (ref) => MarkAllNotificationsReadUseCase(
+        ref.watch(teacherNotificationsRepositoryProvider),
+      ),
+    );
 
-  /// Marks one notification as read, then refreshes the list and the badge.
-  /// Returns false on failure. This is non-critical, so no snackbar is needed.
+class NotificationActionsNotifier extends Notifier<bool> {
+  /// State = true while "mark all" is running
+  @override
+  bool build() => false;
+
+  /// Marks one notification as read. Non-critical, so it returns only a bool.
   Future<bool> markRead(int id) async {
     try {
       await ref.read(markNotificationReadUseCaseProvider)(id);
-      ref.invalidate(notificationsProvider); // invalidates All and Unread
-      ref.invalidate(unreadCountProvider);
+      _refreshLists();
       return true;
     } catch (_) {
       return false;
     }
   }
+
+  /// Returns null on success, or an error message.
+  Future<String?> markAllRead() async {
+    if (state) return null;
+    state = true;
+    try {
+      await ref.read(markAllNotificationsReadUseCaseProvider)();
+      _refreshLists();
+      return null;
+    } on AppException catch (e) {
+      return e.message;
+    } on Failure catch (f) {
+      return f.message;
+    } catch (_) {
+      return 'Something went wrong, please try again';
+    } finally {
+      state = false;
+    }
+  }
+
+  void _refreshLists() {
+    ref.invalidate(notificationsProvider); // All and Unread
+    ref.invalidate(unreadCountProvider);
+  }
 }
 
 final notificationActionsProvider =
-    NotifierProvider<NotificationActionsNotifier, void>(
+    NotifierProvider<NotificationActionsNotifier, bool>(
       NotificationActionsNotifier.new,
     );
