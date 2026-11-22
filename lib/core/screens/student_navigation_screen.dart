@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
+import 'package:qatar_teachers/features/student%20side/home/domain/entities/student_course_entity.dart';
 import 'package:qatar_teachers/features/student%20side/home/presentation/screens/student_home_screen.dart';
 import 'package:qatar_teachers/features/student%20side/explore/presentation/screens/student_explore_screen.dart';
 import 'package:qatar_teachers/features/student%20side/booking/presentation/screens/student_booking_screen.dart';
 import 'package:qatar_teachers/features/student%20side/profile/presentation/screens/student_profile_screen.dart';
 
 class StudentNavigationScreen extends StatefulWidget {
-  const StudentNavigationScreen({super.key});
+  const StudentNavigationScreen({super.key, this.userName = 'Student'});
+
+  /// Shown in the home greeting. Pass the real profile name from the caller
+  /// (or replace this with a profile provider lookup).
+  final String userName;
 
   @override
   State<StudentNavigationScreen> createState() =>
@@ -14,7 +19,11 @@ class StudentNavigationScreen extends StatefulWidget {
 }
 
 class _StudentNavigationScreenState extends State<StudentNavigationScreen> {
-  int _currentIndex = 0;
+  static const int _homeIndex = 0;
+  static const int _exploreIndex = 1;
+  static const int _bookingsIndex = 2;
+
+  int _currentIndex = _homeIndex;
 
   late final List<Widget> _tabs;
 
@@ -46,11 +55,31 @@ class _StudentNavigationScreenState extends State<StudentNavigationScreen> {
     super.initState();
 
     _tabs = [
-      const StudentHomeScreen(),
+      StudentHomeScreen(
+        userName: widget.userName,
+        onNotificationsTap: _openNotifications,
+        onSearchTap: () => _goTo(_exploreIndex),
+        onViewAllSessions: () => _goTo(_bookingsIndex),
+        onViewAllCourses: () => _goTo(_exploreIndex),
+        onCourseTap: _openCourse,
+      ),
       const StudentExploreScreen(),
       const StudentBookingScreen(),
       const StudentProfileScreen(),
     ];
+  }
+
+  void _goTo(int index) {
+    if (_currentIndex == index) return;
+    setState(() => _currentIndex = index);
+  }
+
+  void _openNotifications() {
+    // TODO: push the student notifications screen once it exists.
+  }
+
+  void _openCourse(StudentCourseEntity course) {
+    // TODO: push the course details screen once it exists (course.id).
   }
 
   @override
@@ -99,13 +128,7 @@ class _StudentNavigationScreenState extends State<StudentNavigationScreen> {
                   isSelected: isSelected,
                   primaryColor: primaryColor,
                   secondaryColor: secondaryColor,
-                  onTap: () {
-                    if (_currentIndex == index) return;
-
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
+                  onTap: () => _goTo(index),
                 ),
               );
             }),
