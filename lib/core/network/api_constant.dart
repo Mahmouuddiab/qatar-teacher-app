@@ -87,4 +87,15 @@ class ApiConstants {
   static const String markAllTeacherNotificationsAsRead =
       '/api/Teacher/notifications/read-all';
 
+  // ==================== Student Endpoints ====================
+
+  /// GET (public): subject chips
+  static const String studentSubjects = '/api/Student/subjects';
+
+  /// GET (public): latest courses (?pageSize=10&subject=English)
+  static const String studentCourses = '/api/Student/courses';
+
+  /// GET (student): bookings (?status=Confirmed&pageSize=3)
+  static const String studentBookings = '/api/Student/bookings';
+
 }
