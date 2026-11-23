@@ -9,4 +9,5 @@ class AppRoutes {
   static const String changePassword = '/ChangePasswordScreen';
   static const String teacherBookingDetails = '/TeacherBookingDetailsScreen';
   static const String teacherNotifications = '/TeacherNotificationsScreen';
+  static const String studentNotifications = '/StudentNotificationsScreen';
 }

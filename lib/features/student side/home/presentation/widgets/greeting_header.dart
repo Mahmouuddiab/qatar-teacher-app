@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
+import '../../../notifications/presentation/widgets/student_notification_bell.dart';
 
 class GreetingHeader extends StatelessWidget {
   const GreetingHeader({
@@ -9,7 +10,7 @@ class GreetingHeader extends StatelessWidget {
   });
 
   final String name;
-  final VoidCallback onNotificationsTap;
+  final Future<void> Function() onNotificationsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,26 +39,7 @@ class GreetingHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Tooltip(
-          message: 'Notifications',
-          child: Material(
-            color: AppColors.primaryLight,
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onNotificationsTap,
-              child: const SizedBox(
-                width: 48,
-                height: 48,
-                child: Icon(
-                  Icons.notifications_none_rounded,
-                  size: 24,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ),
-        ),
+        StudentNotificationBell(onTap: onNotificationsTap),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/error/failure.dart';
+import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 import '../../domain/entities/student_booking_entity.dart';
 import '../../domain/entities/student_course_entity.dart';
@@ -27,7 +28,6 @@ class StudentHomeScreen extends ConsumerWidget {
   const StudentHomeScreen({
     super.key,
     required this.userName,
-    required this.onNotificationsTap,
     required this.onSearchTap,
     required this.onViewAllSessions,
     required this.onViewAllCourses,
@@ -36,9 +36,6 @@ class StudentHomeScreen extends ConsumerWidget {
 
   /// Comes from the profile; the parent (tab shell) passes it in.
   final String userName;
-
-  /// Open the notifications screen.
-  final VoidCallback onNotificationsTap;
 
   /// Switch to the Explore tab.
   final VoidCallback onSearchTap;
@@ -91,7 +88,10 @@ class StudentHomeScreen extends ConsumerWidget {
                           children: [
                             GreetingHeader(
                               name: userName,
-                              onNotificationsTap: onNotificationsTap,
+                              onNotificationsTap: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.studentNotifications,
+                              ),
                             ),
                             const SizedBox(height: _Gap.sm),
                             SearchShortcut(onTap: onSearchTap),
