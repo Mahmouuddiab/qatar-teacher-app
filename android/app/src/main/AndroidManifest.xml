@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Android 13+ notification permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Needed for network calls in release builds -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="qatar_teachers"
         android:name="${applicationName}"
@@ -17,14 +23,26 @@
                  while the Flutter UI initializes. After that, this theme continues
                  to determine the Window background behind the Flutter UI. -->
             <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"
+                />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- FCM: channel used when a push arrives while the app is in background.
+             Must match the channel id created in LocalNotificationsService. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel"/>
+
+        <!-- FCM: default small icon for notifications -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher"/>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
