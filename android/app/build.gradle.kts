@@ -1,15 +1,19 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
     namespace = "com.example.qatar_teachers"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -19,7 +23,7 @@ android {
         applicationId = "com.example.qatar_teachers"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = maxOf(flutter.minSdkVersion, 23) // Firebase + notifications need 23+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -40,6 +44,28 @@ kotlin {
     }
 }
 
+dependencies {
+    // Required by flutter_local_notifications (fixes "coreLibraryDesugaring contains no dependencies")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+
+// androidx.core 1.19.0 needs AGP 9.1.0; pin to an older version while you're on AGP 9.0.1
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core:1.17.0")
+        force("androidx.core:core-ktx:1.17.0")
+    }
+}
+
 flutter {
     source = "../.."
+}
+
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            force("androidx.core:core:1.17.0")
+            force("androidx.core:core-ktx:1.17.0")
+        }
+    }
 }

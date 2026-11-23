@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "582845405046",
+    "project_id": "qatar-app-4c737",
+    "storage_bucket": "qatar-app-4c737.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582845405046:android:f47b0c34d3bd43c844cc57",
+        "android_client_info": {
+          "package_name": "com.example.qatar_teachers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNfmO-1PGhtJzDsNpezKJxo_QhxYfx51k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
