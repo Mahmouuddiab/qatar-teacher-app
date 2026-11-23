@@ -9,8 +9,6 @@ import 'package:qatar_teachers/features/student%20side/profile/presentation/scre
 class StudentNavigationScreen extends StatefulWidget {
   const StudentNavigationScreen({super.key, this.userName = 'Student'});
 
-  /// Shown in the home greeting. Pass the real profile name from the caller
-  /// (or replace this with a profile provider lookup).
   final String userName;
 
   @override
@@ -57,7 +55,6 @@ class _StudentNavigationScreenState extends State<StudentNavigationScreen> {
     _tabs = [
       StudentHomeScreen(
         userName: widget.userName,
-        onNotificationsTap: _openNotifications,
         onSearchTap: () => _goTo(_exploreIndex),
         onViewAllSessions: () => _goTo(_bookingsIndex),
         onViewAllCourses: () => _goTo(_exploreIndex),
@@ -74,9 +71,6 @@ class _StudentNavigationScreenState extends State<StudentNavigationScreen> {
     setState(() => _currentIndex = index);
   }
 
-  void _openNotifications() {
-    // TODO: push the student notifications screen once it exists.
-  }
 
   void _openCourse(StudentCourseEntity course) {
     // TODO: push the course details screen once it exists (course.id).

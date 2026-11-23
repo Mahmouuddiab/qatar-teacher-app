@@ -3,6 +3,7 @@ import 'package:qatar_teachers/features/auth/presentation/screens/change_passwor
 import 'package:qatar_teachers/features/auth/presentation/screens/login_screen.dart';
 import 'package:qatar_teachers/features/auth/presentation/screens/register_screen.dart';
 import '../../features/on boarding/screen/onboarding_screen.dart';
+import '../../features/student side/notifications/presentation/screen/student_notifications_screen.dart';
 import '../../features/teacher side/booking/presentation/screens/teacher_booking_details_screen.dart';
 import '../../features/teacher side/home/domain/entities/course_entity.dart';
 import '../../features/teacher side/home/presentation/screens/add_course_screen.dart';
@@ -31,6 +32,10 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const AddCourseScreen());
       case AppRoutes.allCourses:
         return MaterialPageRoute(builder: (_) => const AllCoursesScreen());
+      case AppRoutes.studentNotifications:
+        return MaterialPageRoute(
+          builder: (_) => const StudentNotificationsScreen(),
+        );
       case AppRoutes.courseDetails:
         final courseId = settings.arguments as int;
         return MaterialPageRoute(

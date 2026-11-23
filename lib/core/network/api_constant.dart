@@ -98,4 +98,19 @@ class ApiConstants {
   /// GET (student): bookings (?status=Confirmed&pageSize=3)
   static const String studentBookings = '/api/Student/bookings';
 
+  /// GET (student): notifications (?unreadOnly=false&page=1&pageSize=30)
+  static const String studentNotifications = '/api/Student/notifications';
+
+  /// GET (student): { "count": 1 }
+  static const String studentNotificationsUnreadCount =
+      '/api/Student/notifications/unread-count';
+
+  /// PUT (student): mark one notification as read
+  static String studentNotificationRead(int id) =>
+      '/api/Student/notifications/$id/read';
+
+  /// PUT (student): mark all notifications as read
+  static const String studentNotificationsReadAll =
+      '/api/Student/notifications/read-all';
+
 }
