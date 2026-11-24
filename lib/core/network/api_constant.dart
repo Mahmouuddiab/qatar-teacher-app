@@ -13,6 +13,9 @@ class ApiConstants {
   static const String updateProfile = '/api/Auth/profile';
   static const String changePassword = '/api/Auth/change-password';
   static const String logout = '/api/Auth/logout';
+  /// POST: register or update the authenticated user's FCM device token
+  static const String registerDeviceToken =
+      '/api/notifications/device-token';
 
   // ==================== Teacher Profile Endpoints ====================
 
