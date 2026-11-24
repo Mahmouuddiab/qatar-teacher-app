@@ -7,19 +7,37 @@ import 'package:qatar_teachers/core/router/app_router.dart';
 import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/services/fcm_services.dart';
 import 'package:qatar_teachers/core/widgets/app_snackbar.dart';
+
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  DioHelper.init(baseUrl: ApiConstants.baseUrl, enableLogger: true);
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  DioHelper.init(
+    baseUrl: ApiConstants.baseUrl,
+    enableLogger: true,
+  );
 
   final container = ProviderContainer();
+
+  // Initializes FCM, notification permissions,
+  // foreground messages, background messages, and notification taps.
   await FcmService.instance.init(container);
-  FcmService.instance.registerToken();
+
+  // Do not call registerToken() here.
+  //
+  // The user may not be logged in yet. Register the FCM token
+  // after successful login, when the JWT has already been saved.
 
   runApp(
-    UncontrolledProviderScope(container: container, child: const MyApp()),
+    UncontrolledProviderScope(
+      container: container,
+      child: const MyApp(),
+    ),
   );
 }
 

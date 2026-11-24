@@ -7,6 +7,7 @@ import 'package:qatar_teachers/core/network/dio_helper.dart';
 import 'package:qatar_teachers/core/params/change_password_params.dart';
 import 'package:qatar_teachers/core/params/login_params.dart';
 import 'package:qatar_teachers/core/params/register_params.dart';
+import 'package:qatar_teachers/core/services/fcm_services.dart';
 import 'package:qatar_teachers/features/auth/data/model/user_model.dart';
 
 abstract class AuthRemoteDs {
@@ -27,6 +28,7 @@ class AuthRemoteDSImpl implements AuthRemoteDs {
       if (response.statusCode == 200) {
         final user = UserModel.fromJson(response.data);
         await CacheHelper.saveToken(user.token);
+        await FcmService.instance.registerToken();
         return user;
       }
       throw ServerException(

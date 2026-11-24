@@ -4,68 +4,108 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotificationsService {
   LocalNotificationsService._();
-  static final instance = LocalNotificationsService._();
 
-  final _plugin = FlutterLocalNotificationsPlugin();
+  static final LocalNotificationsService instance =
+  LocalNotificationsService._();
 
-  static const _channel = AndroidNotificationChannel(
+  final FlutterLocalNotificationsPlugin _plugin =
+  FlutterLocalNotificationsPlugin();
+
+  static const AndroidNotificationChannel channel =
+  AndroidNotificationChannel(
     'high_importance_channel',
     'Important notifications',
     description: 'Booking requests and updates',
     importance: Importance.high,
   );
 
-  /// Called with the decoded payload when the user taps a local notification.
   void Function(Map<String, dynamic> data)? onTap;
 
   Future<void> init() async {
-    const settings = InitializationSettings(
+    const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(
-        requestAlertPermission: false, // asked by the FCM service
+        requestAlertPermission: false,
         requestBadgePermission: false,
         requestSoundPermission: false,
       ),
     );
 
     await _plugin.initialize(
-      settings: settings,
-      onDidReceiveNotificationResponse: (response) {
-        final payload = response.payload;
-        if (payload == null || payload.isEmpty) return;
-        try {
-          onTap?.call(jsonDecode(payload) as Map<String, dynamic>);
-        } catch (e) {
-          debugPrint('Bad notification payload: $e');
-        }
-      },
+      settings: initializationSettings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
     );
 
-    await _plugin
+    final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(_channel);
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.createNotificationChannel(channel);
+
+    // Required on Android 13 and newer.
+    await androidPlugin?.requestNotificationsPermission();
+
+    final iosPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+
+    // Required on iOS.
+    await iosPlugin?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+  void _onNotificationResponse(NotificationResponse response) {
+    final payload = response.payload;
+
+    if (payload == null || payload.isEmpty) {
+      return;
+    }
+
+    try {
+      final decodedPayload = jsonDecode(payload);
+
+      if (decodedPayload is Map) {
+        onTap?.call(
+          Map<String, dynamic>.from(decodedPayload),
+        );
+      }
+    } catch (error) {
+      debugPrint('Invalid notification payload: $error');
+    }
   }
 
   Future<void> show({
     required String title,
     required String body,
     Map<String, dynamic> data = const {},
-  }) {
-    return _plugin.show(
-      id: DateTime.now().millisecondsSinceEpoch.remainder(1 << 31),
+  }) async {
+    final notificationId =
+    DateTime.now().millisecondsSinceEpoch.remainder(1 << 31);
+
+    const notificationDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'high_importance_channel',
+        'Important notifications',
+        channelDescription: 'Booking requests and updates',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    );
+
+    await _plugin.show(
+      id: notificationId,
       title: title,
       body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channel.id,
-          _channel.name,
-          channelDescription: _channel.description,
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: const DarwinNotificationDetails(),
-      ),
+      notificationDetails: notificationDetails,
       payload: jsonEncode(data),
     );
   }
