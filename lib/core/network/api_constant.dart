@@ -116,4 +116,6 @@ class ApiConstants {
   static const String studentNotificationsReadAll =
       '/api/Student/notifications/read-all';
 
+  static String studentBookingCancel(int id) => '$studentBookings/$id/cancel';
+
 }
