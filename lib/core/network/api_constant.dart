@@ -118,4 +118,7 @@ class ApiConstants {
 
   static String studentBookingCancel(int id) => '$studentBookings/$id/cancel';
 
+  /// GET (student): booking details
+  static String studentBookingById(int id) => '/api/Student/bookings/$id';
+
 }

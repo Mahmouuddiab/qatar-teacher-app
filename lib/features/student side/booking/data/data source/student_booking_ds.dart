@@ -7,6 +7,8 @@ import 'package:qatar_teachers/core/network/error_message.dart';
 import 'package:qatar_teachers/core/params/create_booking_params.dart';
 import 'package:qatar_teachers/features/student%20side/home/data/models/student_booking_model.dart';
 
+import '../models/student_booking_details_model.dart';
+
 abstract class StudentBookingDs {
   Future<StudentBookingModel> createBooking(CreateBookingParams params);
   Future<List<StudentBookingModel>> getMyBookings({
@@ -15,6 +17,7 @@ abstract class StudentBookingDs {
     required int pageSize,
   });
   Future<void> cancelBooking(int id);
+  Future<StudentBookingDetailsModel> getBookingDetails(int id);
 }
 
 class StudentBookingDsImpl implements StudentBookingDs {
@@ -94,6 +97,31 @@ class StudentBookingDsImpl implements StudentBookingDs {
       throw ServerException(messageFromDio(e));
     } catch (e) {
       debugPrint('cancelBooking error: $e');
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<StudentBookingDetailsModel> getBookingDetails(int id) async {
+    try {
+      final response = await DioHelper.get(
+        path: ApiConstants.studentBookingById(id),
+        withAuth: true,
+      );
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
+        final json = data['data'] is Map<String, dynamic>
+            ? data['data'] as Map<String, dynamic>
+            : data;
+        return StudentBookingDetailsModel.fromJson(json);
+      }
+      throw ServerException(messageFromResponse(response));
+    } on ServerException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ServerException(messageFromDio(e));
+    } catch (e) {
+      debugPrint('getBookingDetails error: $e');
       throw ServerException();
     }
   }

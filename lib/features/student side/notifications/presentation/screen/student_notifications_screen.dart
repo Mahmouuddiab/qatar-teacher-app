@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/error/failure.dart';
+import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 import 'package:qatar_teachers/core/widgets/app_snackbar.dart';
 import 'package:qatar_teachers/features/teacher%20side/notifications/domain/entities/notification_entity.dart';
@@ -32,12 +33,23 @@ class _StudentNotificationsScreenState
         .then((_) {}, onError: (_) {});
   }
 
-  void _open(NotificationEntity n) {
-    // Fire and forget: navigation shouldn't wait for this request
+  Future<void> _open(NotificationEntity n) async {
+    // 1. Mark as read first (only if unread). Failure must not block opening.
     if (!n.isRead) {
-      ref.read(studentNotificationActionsProvider.notifier).markRead(n.id);
+      await ref
+          .read(studentNotificationActionsProvider.notifier)
+          .markRead(n.id);
     }
-    // TODO: open student booking details with n.bookingId
+
+    // 2. Then open the booking
+    final bookingId = n.bookingId;
+    if (bookingId == null || !mounted) return;
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.studentBookingDetails,
+      arguments: bookingId,
+    );
   }
 
   Future<void> _markAllRead() async {

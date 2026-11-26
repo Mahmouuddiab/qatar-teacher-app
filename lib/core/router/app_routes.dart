@@ -10,4 +10,5 @@ class AppRoutes {
   static const String teacherBookingDetails = '/TeacherBookingDetailsScreen';
   static const String teacherNotifications = '/TeacherNotificationsScreen';
   static const String studentNotifications = '/StudentNotificationsScreen';
+  static const String studentBookingDetails = '/StudentBookingDetailsScreen';
 }
