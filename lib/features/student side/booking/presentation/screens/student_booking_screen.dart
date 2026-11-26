@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/error/failure.dart';
+import 'package:qatar_teachers/core/router/app_routes.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
 import 'package:qatar_teachers/core/widgets/app_snackbar.dart';
 import 'package:qatar_teachers/features/student%20side/home/domain/entities/student_booking_entity.dart';
@@ -38,7 +39,7 @@ class _StudentBookingScreenState extends ConsumerState<StudentBookingScreen> {
         title: const Text('Cancel booking?'),
         content: Text(
           'Your session "${b.subject}" with ${b.teacherName} on '
-              '${b.dateLabel} at ${b.timeLabel} will be cancelled.',
+          '${b.dateLabel} at ${b.timeLabel} will be cancelled.',
         ),
         actions: [
           TextButton(
@@ -99,8 +100,9 @@ class _StudentBookingScreenState extends ConsumerState<StudentBookingScreen> {
               for (final f in MyBookingFilter.values)
                 f: bookings.where((b) => f.matches(b.statusUi)).length,
             };
-            final visible =
-            bookings.where((b) => _filter.matches(b.statusUi)).toList();
+            final visible = bookings
+                .where((b) => _filter.matches(b.statusUi))
+                .toList();
 
             return Column(
               children: [
@@ -117,30 +119,34 @@ class _StudentBookingScreenState extends ConsumerState<StudentBookingScreen> {
                     onRefresh: _refresh,
                     child: visible.isEmpty
                         ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [MyBookingsEmptyView(filter: _filter)],
-                    )
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [MyBookingsEmptyView(filter: _filter)],
+                          )
                         : ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        16,
-                        4,
-                        16,
-                        _bottomSpace,
-                      ),
-                      itemCount: visible.length,
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 12),
-                      itemBuilder: (_, i) {
-                        final booking = visible[i];
-                        return MyBookingCard(
-                          booking: booking,
-                          isCancelling: cancelling.contains(booking.id),
-                          onCancel: () => _cancel(booking),
-                          onTap: () {}, // TODO: student booking details
-                        );
-                      },
-                    ),
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(
+                              16,
+                              4,
+                              16,
+                              _bottomSpace,
+                            ),
+                            itemCount: visible.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (_, i) {
+                              final booking = visible[i];
+                              return MyBookingCard(
+                                booking: booking,
+                                isCancelling: cancelling.contains(booking.id),
+                                onCancel: () => _cancel(booking),
+                                onTap: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.studentBookingDetails,
+                                  arguments: visible[i].id,
+                                ),
+                              );
+                            },
+                          ),
                   ),
                 ),
               ],

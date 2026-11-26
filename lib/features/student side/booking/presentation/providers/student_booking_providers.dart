@@ -6,8 +6,10 @@ import 'package:qatar_teachers/features/student%20side/home/domain/entities/stud
 import 'package:qatar_teachers/features/student%20side/home/presentation/providers/student_home_providers.dart';
 import '../../data/data source/student_booking_ds.dart';
 import '../../data/repository/student_booking_repository_impl.dart';
+import '../../domain/entities/student_booking_details_entity.dart';
 import '../../domain/repository/student_booking_repository.dart';
 import '../../domain/usecases/create_booking_usecase.dart';
+import '../../domain/usecases/get_booking_details_usecase.dart';
 import '../../domain/usecases/get_my_bookings_usecase.dart';
 import '../../domain/usecases/cancel_booking_usecase.dart';
 
@@ -98,3 +100,15 @@ class CancelBookingNotifier extends Notifier<Set<int>> {
 final cancelBookingProvider = NotifierProvider<CancelBookingNotifier, Set<int>>(
   CancelBookingNotifier.new,
 );
+
+final getStudentBookingDetailsUseCaseProvider =
+    Provider<GetStudentBookingDetailsUseCase>(
+      (ref) => GetStudentBookingDetailsUseCase(
+        ref.watch(studentBookingRepositoryProvider),
+      ),
+    );
+
+final studentBookingDetailsProvider = FutureProvider.autoDispose
+    .family<StudentBookingDetailsEntity, int>(
+      (ref, id) => ref.read(getStudentBookingDetailsUseCaseProvider)(id),
+    );
