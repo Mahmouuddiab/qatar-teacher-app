@@ -6,10 +6,14 @@ class ExploreListFooter extends StatelessWidget {
     super.key,
     required this.loading,
     required this.hasMore,
+    this.error,
+    this.onRetry,
   });
 
   final bool loading;
   final bool hasMore;
+  final String? error;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +25,20 @@ class ExploreListFooter extends StatelessWidget {
             width: 24,
             height: 24,
             child: CircularProgressIndicator(
-                strokeWidth: 2.5, color: AppColors.primary),
+              strokeWidth: 2.5,
+              color: AppColors.primary,
+            ),
           ),
+        ),
+      );
+    }
+    if (error != null) {
+      return Center(
+        child: TextButton.icon(
+          style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+          onPressed: onRetry,
+          icon: const Icon(Icons.refresh_rounded, size: 18),
+          label: const Text('Couldn\'t load more. Retry'),
         ),
       );
     }

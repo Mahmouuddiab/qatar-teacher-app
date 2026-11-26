@@ -42,8 +42,8 @@ class _BookCourseSheetState extends ConsumerState<BookCourseSheet> {
   late String _mode;
   String? _inlineError;
 
-  late final List<String> _modes = widget.course.sessionMode.toLowerCase() ==
-      'both'
+  late final List<String> _modes =
+  widget.course.sessionMode.toLowerCase() == 'both'
       ? const ['Online', 'InPerson']
       : [widget.course.sessionMode];
 
@@ -61,7 +61,12 @@ class _BookCourseSheetState extends ConsumerState<BookCourseSheet> {
       firstDate: now,
       lastDate: now.add(const Duration(days: 90)),
     );
-    if (picked != null) setState(() => _date = picked);
+    if (picked != null && mounted) {
+      setState(() {
+        _date = picked;
+        _inlineError = null;
+      });
+    }
   }
 
   Future<void> _pickTime() async {
@@ -69,7 +74,12 @@ class _BookCourseSheetState extends ConsumerState<BookCourseSheet> {
       context: context,
       initialTime: _time ?? const TimeOfDay(hour: 17, minute: 0),
     );
-    if (picked != null) setState(() => _time = picked);
+    if (picked != null && mounted) {
+      setState(() {
+        _time = picked;
+        _inlineError = null;
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -93,15 +103,21 @@ class _BookCourseSheetState extends ConsumerState<BookCourseSheet> {
         mode: _mode,
       ),
     );
+    if (!mounted) return;
 
+    // Failure: show it inside the sheet (a snackbar would be hidden behind it)
+    // so the user can pick another time right away.
     if (result.error != null) {
-      // Server rules, e.g. the teacher isn't available at that time
-      AppSnackBar.error(result.error!);
+      setState(() => _inlineError = result.error);
       return;
     }
-    if (result.booking == null) return;
+    if (result.booking == null) {
+      setState(() => _inlineError = 'Booking failed. Please try again.');
+      return;
+    }
 
-    if (mounted) Navigator.pop(context);
+    // Success: close the sheet, then show the snackbar on the screen below.
+    Navigator.pop(context);
     AppSnackBar.success('Request sent. Waiting for the teacher to confirm.');
   }
 
@@ -194,7 +210,10 @@ class _BookCourseSheetState extends ConsumerState<BookCourseSheet> {
                       color: _mode == m ? Colors.white : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
-                    onSelected: (_) => setState(() => _mode = m),
+                    onSelected: (_) => setState(() {
+                      _mode = m;
+                      _inlineError = null;
+                    }),
                   ),
               ],
             ),
