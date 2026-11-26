@@ -6,18 +6,34 @@ class ExploreEmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(top: 100),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 80, 32, 0),
       child: Column(
         children: [
-          Icon(Icons.search_off_rounded,
-              size: 56, color: AppColors.textSecondary),
-          SizedBox(height: 12),
-          Text('No courses found',
-              style: TextStyle(color: AppColors.textSecondary)),
-          SizedBox(height: 4),
-          Text('Try another keyword or subject',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppColors.primaryLight,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.search_off_rounded,
+                size: 40, color: AppColors.primary),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'No courses found',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Try a different search or subject.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          ),
         ],
       ),
     );

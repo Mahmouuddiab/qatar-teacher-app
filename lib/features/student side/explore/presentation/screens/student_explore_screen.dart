@@ -1,115 +1,79 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qatar_teachers/core/utils/app_colors.dart';
-import '../widgets/explore_course_card.dart';
+import 'package:qatar_teachers/features/student%20side/home/domain/entities/student_course_entity.dart';
+import 'package:qatar_teachers/features/student%20side/home/presentation/widgets/student_course_card.dart';
+import '../providers/student_explore_providers.dart';
 import '../widgets/explore_empty_view.dart';
 import '../widgets/explore_list_footer.dart';
-import '../widgets/explore_search_bar.dart';
+import '../widgets/explore_search_ba.dart';
 import '../widgets/explore_subject_chips.dart';
-import '../widgets/explore_ui_models.dart';
 import 'student_course_details_screen.dart';
 
-class StudentExploreScreen extends StatefulWidget {
+class StudentExploreScreen extends ConsumerStatefulWidget {
   const StudentExploreScreen({super.key});
 
   @override
-  State<StudentExploreScreen> createState() => _StudentExploreScreenState();
+  ConsumerState<StudentExploreScreen> createState() =>
+      _StudentExploreScreenState();
 }
 
-class _StudentExploreScreenState extends State<StudentExploreScreen> {
-  static const int _pageSize = 6;
+class _StudentExploreScreenState extends ConsumerState<StudentExploreScreen> {
   // Space for the floating bottom nav bar
   static const double _bottomSpace = 120;
 
   final _scroll = ScrollController();
-  Timer? _debounce;
 
-  final List<ExploreCourseUi> _items = [];
-  String _query = '';
-  String? _subject; // null = All
-  int _page = 0;
-  bool _loading = false;
-  bool _hasMore = true;
+  // Prevents queuing more than one post-frame check at a time.
+  bool _checkScheduled = false;
 
   @override
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    _loadMore();
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
+    _scroll.removeListener(_onScroll);
     _scroll.dispose();
     super.dispose();
   }
 
-  /// TODO: replace with GET /api/Student/courses?page=&pageSize=&search=&subject=
-  Future<List<ExploreCourseUi>> _fetchPage(int page) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    final q = _query.trim().toLowerCase();
-    final filtered = sampleExploreCourses.where((c) {
-      final matchesSubject = _subject == null || c.subject == _subject;
-      final matchesQuery = q.isEmpty ||
-          c.title.toLowerCase().contains(q) ||
-          c.teacherName.toLowerCase().contains(q);
-      return matchesSubject && matchesQuery;
-    }).toList();
-    final start = (page - 1) * _pageSize;
-    if (start >= filtered.length) return [];
-    return filtered.skip(start).take(_pageSize).toList();
-  }
-
   void _onScroll() {
+    if (!_scroll.hasClients) return;
     if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 300) {
-      _loadMore();
+      ref.read(exploreProvider.notifier).loadMore();
     }
   }
 
-  Future<void> _loadMore() async {
-    if (_loading || !_hasMore) return;
-    setState(() => _loading = true);
+  /// If the loaded items don't fill the screen, the list can't scroll,
+  /// so _onScroll never fires. This loads the next page in that case.
+  void _loadMoreIfNotScrollable() {
+    if (_checkScheduled) return;
+    _checkScheduled = true;
 
-    final next = _page + 1;
-    final result = await _fetchPage(next);
-    if (!mounted) return;
-
-    setState(() {
-      _items.addAll(result);
-      _page = next;
-      _hasMore = result.length == _pageSize;
-      _loading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted || !_scroll.hasClients) return;
+      final s = ref.read(exploreProvider);
+      final canLoad =
+          s.hasMore && !s.loading && !s.loadingMore && s.error == null;
+      if (canLoad && _scroll.position.maxScrollExtent <= 0) {
+        ref.read(exploreProvider.notifier).loadMore();
+      }
     });
   }
 
-  /// Starts again from page 1 (new search, new subject, pull-to-refresh).
-  Future<void> _reload() async {
-    setState(() {
-      _items.clear();
-      _page = 0;
-      _hasMore = true;
-      _loading = false;
-    });
-    await _loadMore();
-  }
-
+  // Debounce lives in ExploreNotifier.setQuery.
+  // When the query is non-empty the notifier uses searchCourses,
+  // otherwise it uses getCourses.
   void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      _query = value;
-      _reload();
-    });
+    ref.read(exploreProvider.notifier).setQuery(value);
   }
 
-  void _onSubjectChanged(String? subject) {
-    if (subject == _subject) return;
-    _subject = subject;
-    _reload();
-  }
-
-  void _openDetails(ExploreCourseUi course) {
+  void _openDetails(StudentCourseEntity course) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -120,7 +84,10 @@ class _StudentExploreScreenState extends State<StudentExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final firstLoad = _items.isEmpty && _loading;
+    final state = ref.watch(exploreProvider);
+    final notifier = ref.read(exploreProvider.notifier);
+    final subjectsAsync = ref.watch(exploreSubjectsProvider);
+    final subjects = subjectsAsync.value ?? const <String>[];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -142,55 +109,97 @@ class _StudentExploreScreenState extends State<StudentExploreScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: ExploreSearchBar(onChanged: _onSearchChanged),
+              child: ExploreSearchBar(
+                initialValue: state.query,
+                onChanged: _onSearchChanged,
+                onSubmitted: _onSearchChanged,
+              ),
             ),
             ExploreSubjectChips(
-              subjects: sampleSubjects, // TODO: from GET /api/Student/subjects
-              selected: _subject,
-              onSelected: _onSubjectChanged,
+              subjects: subjects,
+              selected: state.subject,
+              onSelected: notifier.setSubject,
+              loading: subjectsAsync.isLoading,
+              hasError: subjectsAsync.hasError,
+              onRetry: () => ref.invalidate(exploreSubjectsProvider),
             ),
             const SizedBox(height: 12),
-            Expanded(
-              child: firstLoad
-                  ? const Center(
-                child:
-                CircularProgressIndicator(color: AppColors.primary),
-              )
-                  : RefreshIndicator(
-                color: AppColors.primary,
-                onRefresh: _reload,
-                child: _items.isEmpty
-                    ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [ExploreEmptyView()],
-                )
-                    : ListView.builder(
-                  controller: _scroll,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
-                      16, 4, 16, _bottomSpace),
-                  itemCount: _items.length + 1,
-                  itemBuilder: (_, i) {
-                    if (i == _items.length) {
-                      return ExploreListFooter(
-                        loading: _loading,
-                        hasMore: _hasMore,
-                      );
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ExploreCourseCard(
-                        key: ValueKey(_items[i].id),
-                        course: _items[i],
-                        onTap: () => _openDetails(_items[i]),
-                      ),
-                    );
-                  },
-                ),
-              ),
+            Expanded(child: _body(state, notifier)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _body(ExploreState state, ExploreNotifier notifier) {
+    if (state.loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    // First-page error
+    if (state.error != null && state.items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline,
+                size: 48, color: AppColors.textSecondary),
+            const SizedBox(height: 12),
+            Text(
+              state.error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+              onPressed: notifier.refresh,
+              child: const Text('Retry'),
             ),
           ],
         ),
+      );
+    }
+
+    if (state.items.isNotEmpty) _loadMoreIfNotScrollable();
+
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: notifier.refresh,
+      child: state.items.isEmpty
+          ? ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior:
+        ScrollViewKeyboardDismissBehavior.onDrag,
+        children: const [ExploreEmptyView()],
+      )
+          : ListView.builder(
+        controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior:
+        ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, _bottomSpace),
+        itemCount: state.items.length + 1,
+        itemBuilder: (_, i) {
+          if (i == state.items.length) {
+            return ExploreListFooter(
+              loading: state.loadingMore,
+              hasMore: state.hasMore,
+              error: state.error,
+              onRetry: () => notifier.loadMore(retry: true),
+            );
+          }
+          final course = state.items[i];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: StudentCourseCard(
+              key: ValueKey(course.id),
+              course: course,
+              onTap: () => _openDetails(course),
+            ),
+          );
+        },
       ),
     );
   }

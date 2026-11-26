@@ -121,4 +121,10 @@ class ApiConstants {
   /// GET (student): booking details
   static String studentBookingById(int id) => '/api/Student/bookings/$id';
 
+  static String studentCourseById(int id) => '$studentCourses/$id';
+
+  static String studentTeacherById(int id) => '/api/Student/teachers/$id';
+
+  static const String studentCoursesSearch = '/api/Student/courses/search';
+
 }
